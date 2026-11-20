@@ -1,6 +1,6 @@
 //=============================================================================
 // alu_tb.v — Self-checking testbench for the RV32I ALU (rtl/alu.v)
-// Part 1 of the RV32I single-cycle CPU.
+// RV32I single-cycle CPU.
 //
 // Every case checks the result AND the zero flag against expected values.
 // Any mismatch prints FAIL and is counted; at the end a summary is printed
