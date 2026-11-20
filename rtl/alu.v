@@ -1,6 +1,6 @@
 //=============================================================================
 // alu.v — RV32I Arithmetic Logic Unit
-// Part 1 of the RV32I single-cycle CPU (Vedas Rasmal, GHRCEM Pune)
+// RV32I single-cycle CPU (Vedas Rasmal, GHRCEM Pune)
 //
 // A pure combinational 32-bit ALU. It takes two 32-bit operands and a 4-bit
 // control code, and produces a 32-bit result plus a zero flag (used later by
