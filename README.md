@@ -1,20 +1,8 @@
-# RV32I Single-Cycle CPU — built one part at a time
+# RV32I Single-Cycle CPU
 
-A single-cycle RV32I CPU in Verilog, built in small verified parts by
-Vedas Rasmal (3rd-year B.Tech ENTC, GHRCEM Pune). Each part lands only after
-its own testbench passes — no part is added on trust.
+A single-cycle RV32I CPU in Verilog, by Vedas Rasmal (3rd-year B.Tech ENTC, GHRCEM Pune). Every module lands only after its own testbench passes — nothing is added on trust.
 
-## Parts
-
-| Part | Module | Status |
-|------|--------|--------|
-| **Part 1 — ALU** | `rtl/alu.v` | Done, testbench passes (see below) |
-| Part 2 — Register file + immediate generator | — | Next |
-| Part 3 — Control unit | — | Planned |
-| Part 4 — Memories + top-level CPU | — | Planned |
-| Part 5 — Full test programs + waveforms | — | Planned |
-
-## Part 1 — ALU (`rtl/alu.v`)
+## ALU (`rtl/alu.v`)
 
 Combinational 32-bit ALU. Inputs: two 32-bit operands `a`, `b` and a 4-bit
 `alu_ctrl`. Outputs: 32-bit `result` and a `zero` flag (1 when the result is
@@ -40,7 +28,7 @@ Shift amount is always `b[4:0]` (RV32I shifts are modulo 32), so a shift by
 32 behaves as a shift by 0. Encoding follows Harris & Harris, *Digital
 Design and Computer Architecture* (RISC-V edition).
 
-## How to run the test
+## How to run the tests
 
 Requires [Icarus Verilog](https://steveicarus.github.io/iverilog/)
 (`sudo apt install iverilog` on Ubuntu/Debian).
@@ -51,9 +39,9 @@ iverilog -o sim/alu_tb.vvp rtl/alu.v tb/alu_tb.v
 vvp sim/alu_tb.vvp
 ```
 
-The testbench (`tb/alu_tb.v`) is self-checking: it checks the result and
-the zero flag of every case against expected values, prints PASS/FAIL per
-case, and exits non-zero if anything fails.
+Each testbench (`tb/*.v`) is self-checking: it checks every case against
+expected values, prints PASS/FAIL per case, and exits non-zero if anything
+fails.
 
 ## Verified result
 
