@@ -1,0 +1,4 @@
+# Simulation outputs (rebuilt by the commands in the README)
+sim/
+*.vvp
+*.vcd
