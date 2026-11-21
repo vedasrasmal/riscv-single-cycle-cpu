@@ -28,6 +28,13 @@ Shift amount is always `b[4:0]` (RV32I shifts are modulo 32), so a shift by
 32 behaves as a shift by 0. Encoding follows Harris & Harris, *Digital
 Design and Computer Architecture* (RISC-V edition).
 
+## Register file (`rtl/regfile.v`)
+
+32 registers x 32 bits, two asynchronous read ports and one synchronous
+write port (write on the rising clock edge, only when `reg_write` is high).
+Register `x0` is hardwired to zero: writes to it are ignored and reads of
+it always return 0.
+
 ## How to run the tests
 
 Requires [Icarus Verilog](https://steveicarus.github.io/iverilog/)
@@ -37,6 +44,8 @@ Requires [Icarus Verilog](https://steveicarus.github.io/iverilog/)
 mkdir -p sim
 iverilog -o sim/alu_tb.vvp rtl/alu.v tb/alu_tb.v
 vvp sim/alu_tb.vvp
+iverilog -o sim/regfile_tb.vvp rtl/regfile.v tb/regfile_tb.v
+vvp sim/regfile_tb.vvp
 ```
 
 Each testbench (`tb/*.v`) is self-checking: it checks every case against
@@ -52,6 +61,9 @@ fails.
   0, 31 and 32, zero flag set/clear, undefined control codes.
 - Result: **47/47 checks passed, ALL TESTS PASSED** (see terminal output
   in the test run below).
+- Register file: **10/10 checks passed** — power-on zeros, write/read on
+  both ports, `x0` write ignored, overwrite, `reg_write = 0` blocks the
+  write, neighbouring registers untouched (Icarus Verilog 12.0, 20 Nov 2026).
 
 ## License
 
