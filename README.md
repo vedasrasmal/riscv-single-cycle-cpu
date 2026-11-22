@@ -35,6 +35,22 @@ write port (write on the rising clock edge, only when `reg_write` is high).
 Register `x0` is hardwired to zero: writes to it are ignored and reads of
 it always return 0.
 
+## Immediate generator (`rtl/imm_gen.v`)
+
+Gathers the scattered immediate bits of each instruction format and
+sign-extends them to 32 bits. `imm_src` selects the format:
+
+| `imm_src` | Format | Instructions |
+|-----------|--------|--------------|
+| `000` | I-type | ADDI, LW, JALR, ... |
+| `001` | S-type | SW, SB, SH |
+| `010` | B-type | BEQ, BNE, ... |
+| `011` | U-type | LUI, AUIPC |
+| `100` | J-type | JAL |
+
+Branch and jump immediates already include their trailing 0 bit
+(instructions are 2-byte aligned).
+
 ## How to run the tests
 
 Requires [Icarus Verilog](https://steveicarus.github.io/iverilog/)
@@ -46,6 +62,8 @@ iverilog -o sim/alu_tb.vvp rtl/alu.v tb/alu_tb.v
 vvp sim/alu_tb.vvp
 iverilog -o sim/regfile_tb.vvp rtl/regfile.v tb/regfile_tb.v
 vvp sim/regfile_tb.vvp
+iverilog -o sim/imm_gen_tb.vvp rtl/imm_gen.v tb/imm_gen_tb.v
+vvp sim/imm_gen_tb.vvp
 ```
 
 Each testbench (`tb/*.v`) is self-checking: it checks every case against
@@ -64,6 +82,8 @@ fails.
 - Register file: **10/10 checks passed** — power-on zeros, write/read on
   both ports, `x0` write ignored, overwrite, `reg_write = 0` blocks the
   write, neighbouring registers untouched (Icarus Verilog 12.0, 20 Nov 2026).
+- Immediate generator: **19/19 checks passed** — self-checking, on real
+  instruction encodings (Icarus Verilog 12.0, 20 Nov 2026).
 
 ## License
 
