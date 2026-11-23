@@ -51,6 +51,15 @@ sign-extends them to 32 bits. `imm_src` selects the format:
 Branch and jump immediates already include their trailing 0 bit
 (instructions are 2-byte aligned).
 
+## Control unit (`rtl/control_unit.v`)
+
+Decodes the opcode, funct3 and funct7 fields into the control signals
+the datapath needs: register write, memory read/write, ALU source,
+branch and jump, plus the 3-bit `imm_src` for the immediate generator.
+A second decoder maps `alu_op` + funct3 + funct7[5] to the ALU control
+code. Unknown opcodes produce all-zero signals — no write, no memory
+access — instead of doing something undefined.
+
 ## How to run the tests
 
 Requires [Icarus Verilog](https://steveicarus.github.io/iverilog/)
@@ -64,6 +73,8 @@ iverilog -o sim/regfile_tb.vvp rtl/regfile.v tb/regfile_tb.v
 vvp sim/regfile_tb.vvp
 iverilog -o sim/imm_gen_tb.vvp rtl/imm_gen.v tb/imm_gen_tb.v
 vvp sim/imm_gen_tb.vvp
+iverilog -o sim/control_unit_tb.vvp rtl/control_unit.v tb/control_unit_tb.v
+vvp sim/control_unit_tb.vvp
 ```
 
 Each testbench (`tb/*.v`) is self-checking: it checks every case against
@@ -84,6 +95,8 @@ fails.
   write, neighbouring registers untouched (Icarus Verilog 12.0, 20 Nov 2026).
 - Immediate generator: **19/19 checks passed** — self-checking, on real
   instruction encodings (Icarus Verilog 12.0, 20 Nov 2026).
+- Control unit: **39/39 checks passed** — self-checking, all opcodes incl.
+  branches, jumps and illegal → NOP (Icarus Verilog 12.0, 21 Nov 2026).
 
 ## License
 
