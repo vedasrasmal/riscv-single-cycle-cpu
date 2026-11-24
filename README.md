@@ -60,6 +60,30 @@ A second decoder maps `alu_op` + funct3 + funct7[5] to the ALU control
 code. Unknown opcodes produce all-zero signals — no write, no memory
 access — instead of doing something undefined.
 
+## Instruction memory (`rtl/instr_mem.v`)
+
+256 words (1 KiB) of read-only memory, loaded from a hex file at
+simulation start (`$readmemh`). The PC is a byte address and
+`addr[9:2]` picks the word. Words past the end of the program are
+pre-filled with NOPs, so running off the end executes NOPs instead of
+producing X values.
+
+## Data memory (`rtl/data_mem.v`)
+
+256 words (1 KiB) of byte-addressable memory. Load size and sign/zero
+extension are handled inside the memory, driven by `funct3`: LB/LH/LW
+sign-extend, LBU/LHU zero-extend; SB/SH/SW write only the addressed
+bytes, leaving neighbouring bytes untouched. Reads are combinational;
+writes happen on the rising clock edge, only when `mem_write` is high.
+
+## Top level (`rtl/riscv_cpu.v`)
+
+Wires everything together into the single-cycle datapath: fetch, decode,
+execute, memory access and write-back in one clock cycle. Next PC: JALR
+goes to `(rs1 + imm)` with bit 0 cleared; JAL or a taken branch goes to
+`PC + imm`; otherwise `PC + 4`. The branch decision uses the ALU zero
+flag and result with the branch type from `funct3`.
+
 ## How to run the tests
 
 Requires [Icarus Verilog](https://steveicarus.github.io/iverilog/)
@@ -97,6 +121,10 @@ fails.
   instruction encodings (Icarus Verilog 12.0, 20 Nov 2026).
 - Control unit: **39/39 checks passed** — self-checking, all opcodes incl.
   branches, jumps and illegal → NOP (Icarus Verilog 12.0, 21 Nov 2026).
+- Memories + top level: exercised by the three full-CPU programs,
+  **59/59 checks passed** (arithmetic 26/26, branches 16/16,
+  LUI/AUIPC/shifts 17/17), Icarus Verilog 12.0, 20 Nov 2026; program
+  testbenches land with the test programs tomorrow.
 
 ## License
 
