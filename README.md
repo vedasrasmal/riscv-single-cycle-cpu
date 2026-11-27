@@ -84,6 +84,17 @@ goes to `(rs1 + imm)` with bit 0 cleared; JAL or a taken branch goes to
 `PC + imm`; otherwise `PC + 4`. The branch decision uses the ALU zero
 flag and result with the branch type from `funct3`.
 
+## Test programs (`tb/prog_*.asm`, `tb/cpu_*_tb.v`)
+
+Three small assembly programs exercise the whole CPU end to end:
+arithmetic and memory (31 instructions), branches and jumps (34
+instructions), and LUI/AUIPC/shifts (20 instructions). A tiny two-pass
+assembler (`tb/asm.py`) turns each `.asm` file into the `.hex` file the
+instruction memory loads. Each program has its own self-checking
+testbench, which runs the program on the CPU and checks the final
+register and memory values. The arithmetic run also dumps a VCD waveform
+(`sim/cpu_arith.vcd`), viewable in GTKWave.
+
 ## How to run the tests
 
 Requires [Icarus Verilog](https://steveicarus.github.io/iverilog/)
@@ -99,6 +110,15 @@ iverilog -o sim/imm_gen_tb.vvp rtl/imm_gen.v tb/imm_gen_tb.v
 vvp sim/imm_gen_tb.vvp
 iverilog -o sim/control_unit_tb.vvp rtl/control_unit.v tb/control_unit_tb.v
 vvp sim/control_unit_tb.vvp
+python3 tb/asm.py tb/prog_arith.asm
+iverilog -o sim/cpu_arith_tb.vvp rtl/riscv_cpu.v rtl/alu.v rtl/regfile.v rtl/imm_gen.v rtl/control_unit.v rtl/instr_mem.v rtl/data_mem.v tb/cpu_arith_tb.v
+vvp sim/cpu_arith_tb.vvp
+python3 tb/asm.py tb/prog_branch.asm
+iverilog -o sim/cpu_branch_tb.vvp rtl/riscv_cpu.v rtl/alu.v rtl/regfile.v rtl/imm_gen.v rtl/control_unit.v rtl/instr_mem.v rtl/data_mem.v tb/cpu_branch_tb.v
+vvp sim/cpu_branch_tb.vvp
+python3 tb/asm.py tb/prog_lui.asm
+iverilog -o sim/cpu_lui_tb.vvp rtl/riscv_cpu.v rtl/alu.v rtl/regfile.v rtl/imm_gen.v rtl/control_unit.v rtl/instr_mem.v rtl/data_mem.v tb/cpu_lui_tb.v
+vvp sim/cpu_lui_tb.vvp
 ```
 
 Each testbench (`tb/*.v`) is self-checking: it checks every case against
@@ -123,8 +143,11 @@ fails.
   branches, jumps and illegal → NOP (Icarus Verilog 12.0, 21 Nov 2026).
 - Memories + top level: exercised by the three full-CPU programs,
   **59/59 checks passed** (arithmetic 26/26, branches 16/16,
-  LUI/AUIPC/shifts 17/17), Icarus Verilog 12.0, 20 Nov 2026; program
-  testbenches land with the test programs tomorrow.
+  LUI/AUIPC/shifts 17/17), Icarus Verilog 12.0, 20 Nov 2026.
+- Full CPU: **174/174 checks passed** — ALU 47/47, register file 10/10,
+  immediate generator 19/19, control unit 39/39, arithmetic 26/26,
+  branches 16/16, LUI/AUIPC/shifts 17/17 (Icarus Verilog 12.0,
+  re-run 27 Nov 2026).
 
 ## License
 
